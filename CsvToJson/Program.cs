@@ -1,41 +1,24 @@
 ﻿
-using System.Text.Json.Serialization;
+using CsvHelper;
+using CsvHelper.Configuration;
+using CsvToJson;
+using System.ComponentModel;
+using System.Globalization;
+using System.Reflection.PortableExecutable;
 
-using Newtonsoft.Json;
-
-static void Main(string[] args)
+var config = new CsvConfiguration(CultureInfo.InvariantCulture)
 {
-	Console.Write("Digite o caminho completo do arquivo CSV: ");
-	string filePath = Console.ReadLine();
+	HasHeaderRecord = true
+};
 
-	try
-	{
-		var csvData = ConvertCsvToJson(filePath);
-	}
-	catch (Exception ex)
-	{
-		Console.WriteLine($"Erro: {ex.Message}");
-	}
+List<Fardo> listFardos;
 
-	 string ConvertCsvToJson(string filePath)
-	{
-		var csvLines = File.ReadAllLines(filePath);
+using (var reader = new StreamReader("../../../epl.csv"))
+using (var csv = new CsvReader(reader, config))
+{
+	csv.Context.RegisterClassMap<FardoMap>();
+ 
+	listFardos = csv.GetRecords<Fardo>().ToList();
 
-		var headers = csvLines[0].Split(',');
-		var rows = new List< Dictionary<string, string> > ();
-
-		for(var i = 1; i < csvLines.Length; i++)
-		{
-			var values = csvLines[i].Split(",");
-			var rowDict = new Dictionary<string, string> ();
-
-			for(var j = 0; i < headers.Length;)
-			{
-				rowDict[headers[j]] = values[j];
-			}
-			rows.Add(rowDict);
-		}
-
-		return "";
-	}
+	Console.WriteLine(listFardos.Count);
 }
